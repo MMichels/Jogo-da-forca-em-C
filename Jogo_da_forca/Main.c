@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 
 // Variaveis globais
 char tela[100000] = "";
@@ -11,24 +12,76 @@ char espaco[50] = "";
 char ltrsErradas[24] = "testes";
 char acertos[150] = "";
 char msg[40];
+int linhasSorteadas[10];
+int rodada = 0;
 int erros = 0;
 
 // funcao que sera utilizado para sortear as palavras de arquivo txt
 void sortearPalavra() {
+	char plrSort[50], dicSort[100];
+	char buffer[300];
+	int linhas = 0;
+	// alimenta a função rand para gerar numeros aleatorios de verdade
+	srand((unsigned)time(NULL));
+	FILE *arq = NULL;
+	fopen_s(&arq, "Arquivo_palavras.txt", "r");
+	if (arq == NULL) {
+		//aviso se o arquivo nao puder ser aberto;
+		printf("Erro, nao foi possivel abrir o arquivo de palavras!!");
+		system("quit");
+	}
+	else
+	{
+		// conta o numero de linhas do arquivo;
+		while (fgets(buffer, 300, arq) != NULL){
+			linhas++;
+		}
+		// sorteria um numero aleatorio entre 0 e o numero de linhas do arquivo, cuida para sempre sortear um numero diferente;
+		int linhaSorteada;
+		int i;
+		do {
+			i = 1;
+			linhaSorteada = rand() % linhas;
+			for (int c = 0; c < sizeof(linhasSorteadas); c++) {
+				if (linhaSorteada == linhasSorteadas[c]) {
+					i = 0;
+				}
+			}
+		} while (i == 0);
+		// move o ponteiro do arquivo para o inicio
+		rewind(arq);
+		// percorre o arquivo ate a linha sorteada
+		for (int c = 0; c < linhaSorteada; c++) {
+			fgets(buffer, 300, arq);
+		}
+		// captura a palavra
+		fscanf_s(arq, "PALAVRA: %s\t", &plrSort, sizeof(plrSort));
+		// captura a dica
+		fgets(dicSort, sizeof(dicSort), arq);
+		// salva as linhas sorteadas
+		linhasSorteadas[rodada] = linhaSorteada;
 
-	strcpy_s(palavra, 50, "carro");
-	strcpy_s(dica, 100, "locomocao sobre rodas muito utilizada");
+	}
+	// copia a palavra e a dica sorteada para as variaveis globais
+	strcpy_s(palavra, 50, plrSort);
+	strcpy_s(dica, 100, dicSort);
 }
 
 
 // procedimento para zerar variaveis para um novo jogo
 int newGame() {
-	sortearPalavra();
-	erros = 0;
-	sprintf_s(msg, 40, "%s", "  ");
 	memset(ltrsErradas, '\0', strlen(ltrsErradas));
 	memset(acertos, '\0', strlen(acertos));
+	memset(palavra, '\0', 50);
+	memset(espaco, '\0', 50);
+	sortearPalavra();
+	rodada++;
+	erros = 0;
+	sprintf_s(msg, 40, "%s", "  ");
 	memset(espaco, '_', strlen(palavra));
+	for (int c = 0; c < strlen(palavra); c++) {
+		if (espaco[c] == -2) espaco[c] = 0;
+	}
 	return 0;
 }
 
@@ -60,10 +113,7 @@ int verfEspacos() {
 
 // funcao para revelar a palavra final
 int revelarPalavra() {
-	for (int c = 0; c < strlen(palavra); c++) {
-		espaco[c] = palavra[c];
-	}
-
+	strcpy_s(espaco, 50, palavra);
 	return 0;
 }
 
@@ -254,12 +304,12 @@ int main() {
 		if (verfEspacos() <= 0) {
 			printf("PARABENS, VOCE ACERTOU!!\n\n");
 			revelarPalavra();
-			printf("A dica era: %s\n", dica);
+			printf("%s\n", dica);
 			desenharTela(erros);
 			erros = 10;
 		}
 		if (erros == 5) {
-			printf("DICA: %s\n", dica);
+			printf("%s\n", dica);
 		}
 		if (erros == 6) {
 			printf("VOCE PERDEU!!\n\n");

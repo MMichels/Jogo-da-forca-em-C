@@ -1,0 +1,4 @@
+PALAVRA: carro	DICA: meio de locomocao terrestre amplamente utilizado
+PALAVRA: passaro	DICA: Ave que possui habilidade de cantar
+PALAVRA: cpu	DICA: principal unidade de processamento do computador
+PALAVRA: musica	DICA: sequencia sonora armonica, produzida por diversos intrumentos
